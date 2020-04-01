@@ -1,0 +1,10 @@
+*.pyc
+cache
+logs
+airflow*
+*.cfg
+.DS_Store
+*~
+*.ipynb
+.ipynb_checkpoints
+*.bak
