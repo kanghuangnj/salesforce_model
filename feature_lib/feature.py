@@ -1,16 +1,20 @@
 
-from feature_lib.utils import dataloader
+from feature_lib.utils import dataloader, filter_na
 from feature_lib.header import feature_columns
 import pandas as pd
 import numpy as np
 class Feature:
     def __init__(self, source):
         self.df = dataloader(source)
+        self._prepare()
         self.mean = []
         self.std = []
         self.max = []
         self.min = []
        
+    def _prepare(self):
+        print ('parent')
+
 
     def __fit_continuous(self):
         cont_col = self.feature_column['continuous']
@@ -74,30 +78,54 @@ class Feature:
 class Account(Feature):
     def __init__(self):
         self.feature_column = feature_columns['account']
-        Feature.__init__(self, 'account')
+        #Feature.__init__(self, 'account')
+        super(Account, self).__init__('account')
 
+
+    def _prepare(self):
+        good_feat =['Account_FTE__c',
+                    'Number_of_Full_Time_Employees__c',
+                    'Unomy_Company_Size_Formula__c',
+                    'Unomy_Estimated_Revenue_Formula__c',
+                    'Unomy_Facebook_Likes__c',
+                    'Unomy_Twitter_Followers__c',
+                    'Unomy_Alexa_Global_Rank__c',
+                    'Unomy_Alexa_US_Rank__c',]
+        self.df = filter_na(self.df, good_feat)
+    
 
 class Location_Scorecard(Feature):
     def __init__(self):
         self.feature_column = feature_columns['location_scorecard']
-        Feature.__init__(self, 'location_scorecard')
+        super(Location_Scorecard, self).__init__('location_scorecard')
+    
+    def _prepare(self):
         ls_df = self.df
-        building_df = dataloader('building', rename_flag=True) 
-        us_building_df = building_df[(building_df['country'] == 'USA') &
-                        (~building_df['atlas_location_uuid'].isna()) & 
-                        (building_df['atlas_location_uuid'] != 'TestBuilding')]
-        self.df = ls_df[ls_df['atlas_location_uuid'].isin(us_building_df['atlas_location_uuid'])]
-
+        building_df = dataloader('building')
+        us_building_df = building_df[(building_df['Country__c'] == 'USA') &
+                                (~building_df['UUID__c'].isna()) & 
+                                (building_df['UUID__c'] != 'TestBuilding')]
+        ls_df = ls_df[ls_df['atlas_location_uuid'].isin(us_building_df['UUID__c'])]
+        self.df = ls_df
+        print (len(ls_df))
+        
 class Building(Feature):
     def __init__(self):
         self.feature_column = feature_columns['building']
-        Feature.__init__(self, 'building')
+        super(Building, self).__init__('building')
+ 
+    def _prepare(self):
+       
         building_df = self.df
         us_building_df = building_df[(building_df['Country__c'] == 'USA') &
                                 (~building_df['UUID__c'].isna()) & 
                                 (building_df['UUID__c'] != 'TestBuilding')]
         self.df = us_building_df
-# feat = Feature('account')
-# feat.fit()
+
+class Industry_Reason(Feature):
+    def __init__(self):
+        pass
+    
+#feat = Location_Scorecard()
 # np_dat = feat.transform()
 # print (np_dat[0])

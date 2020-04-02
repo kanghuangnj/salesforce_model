@@ -8,3 +8,5 @@ airflow*
 *.ipynb
 .ipynb_checkpoints
 *.bak
+artifacts
+*.out

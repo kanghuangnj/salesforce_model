@@ -1,9 +1,7 @@
 
 import os
-
-from feature_lib.utils import union_column, filter_na, dataloader
 from feature_lib.rating import Sampler
-from feature_lib.header import OUTPUTPATH, datapaths
+from feature_lib.header import OUTPUTPATH
 from feature_lib.feature import Account, Location_Scorecard, Building
 import pandas as pd
 
@@ -64,18 +62,12 @@ def filter_tables():
     # print (len(data) / len(target_account_df)
 
 def rating_gen():
-    data = {}
-    source_list = ['opportunity', 'geography', 'building']
-    for source, filepath in datapaths.items():
-        if source in source_list: continue
-        data[source] = dataloader(source, rename_flag=True)
-
     # op_df = data['opportunity']
     # ls_df = data['location_scorecard'] 
     # acc_df = data['account']
     # building_df = data['building']
-    
-    sampler = Sampler(data)
+    sources = ['opportunity', 'geography', 'building']
+    sampler = Sampler(sources)
     neg_op_df = sampler.negative_sampling()
     pos_op_df = sampler.positive_sampling()
     pos_op_df = pos_op_df[['account_id', 'atlas_location_uuid']]
@@ -98,6 +90,12 @@ def define_feat_fit(name):
     return execute_feat_fit
 
 
+names = ['account', 'location_scorecard', 'building']
+feat_function = {}
+for name in names:
+    feat_function[name] = define_feat_fit(name)
+
+
 def location_feat_merge(feat_fit):
     ls_df =  feat_fit['location_scorecard'].df
     building_df = feat_fit['building'].df
@@ -114,7 +112,7 @@ def location_feat_merge(feat_fit):
     building_df = building_df.loc[loc_list]
     loc2id = {}
     for i, loc in enumerate(loc_list):
-        loc2id[loc] = id
+        loc2id[loc] = i
     building_np = feat_fit['building'].transform(building_df)
     ls_np = feat_fit['location_scorecard'].transform(ls_df)
     loc_feat = np.hstack([building_np, ls_np])
@@ -123,13 +121,13 @@ def location_feat_merge(feat_fit):
 def account_feat_merge(feat_fit):
     rating_df = pd.read_csv(pj(OUTPUTPATH, 'rating.csv'))
     valid_acc = rating_df.account_id.unique()
-    acc_df = feat_fit.df
+    acc_df = feat_fit['account'].df
     acc_df = acc_df[acc_df['Id'].isin(valid_acc)]
     acc_np = feat_fit['account'].transform(acc_df)
     acc2id = {}
     acc_list = acc_df['Id'].unique()
     for i, acc in enumerate(acc_list):
-        acc2id[acc] = id
+        acc2id[acc] = i
     acc_feat = acc_np
     return acc_feat, acc2id
 
@@ -143,11 +141,13 @@ def merge_feat(names, **context):
     loc_feat, loc2id = location_feat_merge(feat_fit)
     acc_feat, acc2id = account_feat_merge(feat_fit)
     np.savetxt('loc_feat.out', loc_feat)
-    np.savetxt('acc_feat.out'. acc_feat)
-    np.save(pj(OUTPUTPATH, 'loc_feat.out'), loc_feat)
-    np.save(pj(OUTPUTPATH, 'acc_feat.out'), acc_feat)
-    pickle.dump(loc2id, pj(OUTPUTPATH, 'loc2id.pkl'))
-    pickle.dump(acc2id, pj(OUTPUTPATH, 'acc2id.pkl'))
+    np.savetxt('acc_feat.out', acc_feat)
+    np.save(pj(OUTPUTPATH, 'loc_feat'), loc_feat)
+    np.save(pj(OUTPUTPATH, 'acc_feat'), acc_feat)
+    with open(pj(OUTPUTPATH, 'loc2id.pkl'), 'wb') as f:
+        pickle.dump(loc2id, f)
+    with open(pj(OUTPUTPATH, 'acc2id.pkl'), 'wb') as f:
+        pickle.dump(acc2id, f)
     # features = {
     #     'loc_feat': loc_feat,
     #     'loc2id': loc2id,
@@ -160,21 +160,21 @@ def merge_feat(names, **context):
 #     features = context['task_instance'].xcom_pull(task_ids='merge_all_features')
 #     rating_df  = context['task_instance'].xcom_pull(task_ids='rating')
 
-   
 
-names = ['account', 'location_scorecard', 'building']
-feat_function = {}
-for name in names:
-    feat_function[name] = define_feat_fit(name)
 
-feat_fit = {
-    'account': feat_function['account'](),
-    'building': feat_function['building'](),
-    'location_scorecard': feat_function['location_scorecard'](),
-    'rating': rating_gen()
-}
-context = {
-    'feat_fit': feat_fit,
-    'data': data
-}
-merge_feat(names, **context)
+
+
+
+
+
+# test
+# feat_fit = {
+#     'account': feat_function['account'](),
+#     'building': feat_function['building'](),
+#     'location_scorecard': feat_function['location_scorecard'](),
+#     'rating': rating_gen()
+# }
+# context = {
+#     'feat_fit': feat_fit,
+# }
+# merge_feat(names, **context)

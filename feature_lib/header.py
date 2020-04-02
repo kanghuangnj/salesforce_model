@@ -184,8 +184,8 @@ feature_mappings = {
 }
 
 DATAPATH = '/Users/kanghuang/Documents/work/location_recommendation/salesforce_data'
-CACHEPATH = '/Users/kanghuang/Documents/work/location_recommendation/opportunity_model/cache'
-OUTPUTPATH = '/Users/kanghuang/Documents/work/location_recommendation/opportunity_model/artifacts'
+CACHEPATH = '/Users/kanghuang/Documents/work/location_recommendation/salesforce_model/cache'
+OUTPUTPATH = '/Users/kanghuang/Documents/work/location_recommendation/salesforce_model/artifacts'
 datapaths= {
     'opportunity': pj(DATAPATH, 'sfdc_opportunities_all.csv'),
     'account': pj(DATAPATH, 'sfdc_accounts_all.csv'),

@@ -7,9 +7,9 @@ from airflow.operators.python_operator import PythonOperator,BranchPythonOperato
 from airflow.operators.dummy_operator import DummyOperator
 
 import os,sys
-FEATLIB_PATH = '/Users/kanghuang/Documents/work/location_recommendation/opportunity_model'
+FEATLIB_PATH = '/Users/kanghuang/Documents/work/location_recommendation/salesforce_model'
 sys.path.insert(0, FEATLIB_PATH)
-from feature_lib import *
+from feature_lib.function import feat_function, merge_feat, rating_gen
 
 args = {
     'owner': 'kang',
