@@ -76,9 +76,10 @@ class SampleGenerator(object):
         """instance train loader for one training epoch"""
         users, items, ratings = [], [], []
         acc2id = self.dataset['acc2id']
-        loc2id = self.data['loc2id']
+        loc2id = self.dataset['loc2id']
         batch_size = self.dataset['batch_size']
         for row in self.train_ratings.itertuples():
+            if (not row.account_id in acc2id) or (not row.location_id in loc2id): continue
             users.append(int(acc2id[row.account_id]))
             items.append(int(loc2id[row.location_id]))
             ratings.append(float(row.rating))
@@ -103,9 +104,11 @@ class SampleGenerator(object):
         loc2id = self.dataset['loc2id']
    
         for row in eval_ratings.itertuples():
-            test_users.append(int(acc2id[row['account_id']]))
-            test_items.append(int(loc2id[row['location_id']]))
-            gold_scores.append(row['rating'])
+            if (not row.account_id in acc2id) or (not row.location_id in loc2id): continue
+            test_users.append(int(acc2id[row.account_id]))
+            test_items.append(int(loc2id[row.location_id]))
+            gold_scores.append(row.rating)
+        print (len(test_users))
         return [torch.LongTensor(test_users), torch.LongTensor(test_items), torch.FloatTensor(gold_scores)]
 
 def dataloader(path, config):

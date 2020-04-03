@@ -8,7 +8,7 @@ mlp_config = {'alias': 'mlp-implicit',
               'l2_regularization': 1e-8,  # MLP model is sensitive to hyper params
               'use_cuda': False,
               'device_id': -1,
-              'pretrain': True,
+              'pretrain': False,
               'pretrain_mlp': 'checkpoints/{}'.format('mlp-implicit.model'),
               'model_dir': 'checkpoints/{}_epoch{}_auc{:.4f}.model',
               'data_dir': 'data/wework',

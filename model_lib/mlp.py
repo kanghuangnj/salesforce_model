@@ -5,7 +5,7 @@ from torch import nn
 from model_lib.engine import Engine
 from model_lib.utils import use_cuda, resume_checkpoint
 from model_lib.config import WEWORK_DIR
-
+pj = os.path.join
 class MLP(torch.nn.Module):
     def __init__(self, config):
         super(MLP, self).__init__()
@@ -53,8 +53,8 @@ class MLP(torch.nn.Module):
         return logits
 
     def init_embedding(self):
-        acc_vectors = np.load(self.config['pretrain_acc'])
-        loc_vectors = np.load(self.config['pretrain_loc'])
+        acc_vectors = np.load(pj(WEWORK_DIR, self.config['pre_acc']))
+        loc_vectors = np.load(pj(WEWORK_DIR, self.config['pre_loc']))
         print (acc_vectors.shape, loc_vectors.shape)
         num_users, acc_dim = acc_vectors.shape
         num_items, loc_dim = loc_vectors.shape

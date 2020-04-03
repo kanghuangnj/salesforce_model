@@ -56,7 +56,7 @@ def train(args):
     for epoch in range(config['num_epoch']):
         print('Epoch {} starts !'.format(epoch))
         print('-' * 80)
-        train_loader = sample_generator.instance_a_train_loader(dataset)
+        train_loader = sample_generator.instance_a_train_loader()
         engine.train_an_epoch(train_loader, epoch_id=epoch)
         auc = engine.evaluate(val_data, epoch_id=epoch)
         if auc < best_metric:
