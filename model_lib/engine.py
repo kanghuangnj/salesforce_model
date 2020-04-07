@@ -1,16 +1,17 @@
 import torch
+import os
 from model_lib.utils import save_checkpoint, resume_checkpoint, use_optimizer
 from model_lib.metrics import MetronAtK
+from model_lib.config import WEWORK_DIR
 from torch.autograd import Variable
 from tensorboardX import SummaryWriter
 
-
+pj = os.path.join
 class Engine(object):
     """Meta Engine for training & evaluating NCF model
 
     Note: Subclass should implement self.model !
     """
-
     def __init__(self, config):
         self.config = config  # model configuration
         self._metron = MetronAtK()
@@ -60,8 +61,6 @@ class Engine(object):
             if self.config['use_cuda'] is True:
                 test_users = test_users.cuda()
                 test_items = test_items.cuda()
-                negative_users = negative_users.cuda()
-                negative_items = negative_items.cuda()
             test_scores = self.model(test_users, test_items)
             if self.config['use_cuda'] is True:
                 test_users = test_users.cpu()
@@ -69,9 +68,9 @@ class Engine(object):
                 test_scores = test_scores.cpu()
             # print (test_scores.data.view(-1).tolist())
             self._metron.subjects = [test_users.data.view(-1).tolist(),
-                                 test_items.data.view(-1).tolist(),
-                                 test_scores.data.view(-1).tolist(),
-                                 gold_scores.data.view(-1).tolist()]
+                                    test_items.data.view(-1).tolist(),
+                                    test_scores.data.view(-1).tolist(),
+                                    gold_scores.data.view(-1).tolist()]
 
         auc = self._metron.cal_auc()
         print('Epoch {}: {}'.format(epoch_id, auc))
@@ -79,7 +78,7 @@ class Engine(object):
 
     def save(self, alias, epoch_id, auc):
         assert hasattr(self, 'model'), 'Please specify the exact model !'
-        model_dir = self.config['model_dir'].format(alias, epoch_id, auc)
+        model_dir = pj(WEWORK_DIR, self.config['model_dir'].format(alias, epoch_id, auc))
         save_checkpoint(self.model, model_dir)
 
     def load(self, alias, epoch_id, auc):

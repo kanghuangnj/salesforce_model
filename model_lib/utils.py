@@ -12,8 +12,6 @@ def save_checkpoint(model, model_dir):
 def resume_checkpoint(model, model_dir, device_id):
     if device_id < 0:
         state_dict = torch.load(model_dir, map_location=torch.device('cpu'))
-        state_dict['embedding_user.weight'] = state_dict['embedding_user.weight'][:214,:]
-        state_dict['embedding_item.weight'] = state_dict['embedding_item.weight'][:43,:]
         
     else:
         state_dict = torch.load(model_dir,

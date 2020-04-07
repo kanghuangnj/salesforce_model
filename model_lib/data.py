@@ -27,7 +27,7 @@ class UserItemRatingDataset(Dataset):
     def __len__(self):
         return self.user_tensor.size(0)
 
-class SampleGenerator(object):
+class DataGenerator(object):
     """Construct dataset for NCF"""
 
     def __init__(self, dataset, config):
@@ -47,7 +47,6 @@ class SampleGenerator(object):
             self.preprocess_ratings = self._normalize(ratings)
         else:
             self.preprocess_ratings = self._binarize(ratings)
-        self.user_pool = set(self.ratings['account_id'].unique())
 
         self.train_ratings, self.testval_ratings = self._split(self.preprocess_ratings)
         self.test_ratings = self.testval_ratings.sample(len(self.testval_ratings) // 2).reset_index(drop=True)
@@ -118,7 +117,10 @@ def dataloader(path, config):
         loc2id = pickle.load(f)
     with open(pj(path, 'acc2id.pkl'), 'rb') as f:
         acc2id = pickle.load(f)
-    rating = pd.read_csv(pj(path, 'rating.csv'))
+    if config['mode'] == 'train':
+        rating = pd.read_csv(pj(path, 'rating.csv'))
+    if config['mode'] == 'test':
+        rating = pd.read_csv(pj(path, 'rating_test.csv'))
     rating = rating.rename(columns={'atlas_location_uuid': 'location_id', 'label': 'rating'})
     return {
         'account_embedding': acc_embedding,
