@@ -182,10 +182,10 @@ feature_mappings = {
     }
 
 }
-
-DATAPATH = '/Users/kanghuang/Documents/work/location_recommendation/salesforce_data'
-CACHEPATH = '/Users/kanghuang/Documents/work/location_recommendation/salesforce_model/cache'
-OUTPUTPATH = '/Users/kanghuang/Documents/work/location_recommendation/salesforce_model/artifacts'
+ROOTPATH = os.path.dirname(os.path.abspath(__file__))
+DATAPATH = pj(ROOTPATH, '../../salesforce_data')
+CACHEPATH = pj(ROOTPATH, '../cache')
+OUTPUTPATH = pj(ROOTPATH, '../artifacts')
 datapaths= {
     'opportunity': pj(DATAPATH, 'sfdc_opportunities_all.csv'),
     'account': pj(DATAPATH, 'sfdc_accounts_all.csv'),

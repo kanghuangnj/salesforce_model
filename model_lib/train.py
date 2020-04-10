@@ -16,7 +16,11 @@ MODEL_SPEC = {
   },
 }
 
-def train(args):
+def train():
+    args = {
+      'model': 'mlp',
+      'mode': 'train'
+    }
     spec = MODEL_SPEC[args['model']]
     config = spec['config']
     Engine = spec['engine']

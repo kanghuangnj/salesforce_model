@@ -1,3 +1,5 @@
+import os
+pj = os.path.join
 mlp_config = {'alias': 'mlp-implicit',
               'num_epoch': 2,
               'batch_size': 256,  # 1024,
@@ -16,4 +18,5 @@ mlp_config = {'alias': 'mlp-implicit',
               'implicit': False}
 
 
-WEWORK_DIR = '/Users/kanghuang/Documents/work/location_recommendation/salesforce_model/artifacts'
+ROOTPATH = os.path.dirname(os.path.abspath(__file__))
+WEWORK_DIR = pj(ROOTPATH, '../artifacts')

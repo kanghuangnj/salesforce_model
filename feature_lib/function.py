@@ -66,6 +66,9 @@ def rating_gen():
     # ls_df = data['location_scorecard'] 
     # acc_df = data['account']
     # building_df = data['building']
+    save_path = pj(OUTPUTPATH, 'rating.csv')
+    if os.path.exists(save_path):
+        return
     sources = ['opportunity', 'geography', 'building']
     sampler = Sampler(sources)
     neg_op_df = sampler.negative_sampling()
@@ -76,8 +79,7 @@ def rating_gen():
     neg_op_df['label'] = 0
     rating_df = pd.concat([pos_op_df, neg_op_df], axis=0)
     rating_df = rating_df.sample(frac=1).reset_index(drop=True)
-    
-    rating_df.to_csv(pj(OUTPUTPATH, 'rating.csv'))
+    rating_df.to_csv(save_path)
 
 
 def define_feat_fit(name):
@@ -97,6 +99,11 @@ for name in names:
 
 
 def location_feat_merge(feat_fit):
+    feat_save_path = pj(OUTPUTPATH, 'loc_feat')
+    id_save_path = pj(OUTPUTPATH, 'loc2id.pkl')
+
+    if os.path.exists(feat_save_path) and os.path.join(id_save_path):
+        return
     ls_df =  feat_fit['location_scorecard'].df
     building_df = feat_fit['building'].df
     loc_set = set()
@@ -116,9 +123,17 @@ def location_feat_merge(feat_fit):
     building_np = feat_fit['building'].transform(building_df)
     ls_np = feat_fit['location_scorecard'].transform(ls_df)
     loc_feat = np.hstack([building_np, ls_np])
-    return loc_feat, loc2id
+
+    np.save(feat_save_path, loc_feat)
+    with open(id_save_path, 'wb') as f:
+        pickle.dump(loc2id, f)
 
 def account_feat_merge(feat_fit):
+    feat_save_path = pj(OUTPUTPATH, 'acc_feat')
+    id_save_path = pj(OUTPUTPATH, 'acc2id.pkl')
+
+    if os.path.exists(feat_save_path) and os.path.join(id_save_path):
+        return
     rating_df = pd.read_csv(pj(OUTPUTPATH, 'rating.csv'))
     valid_acc = rating_df.account_id.unique()
     acc_df = feat_fit['account'].df
@@ -129,7 +144,10 @@ def account_feat_merge(feat_fit):
     for i, acc in enumerate(acc_list):
         acc2id[acc] = i
     acc_feat = acc_np
-    return acc_feat, acc2id
+    np.save(feat_save_path, acc_feat)
+    with open(id_save_path, 'wb') as f:
+        pickle.dump(acc2id, f)
+    
 
 def merge_feat(names, **context):
     feat_fit = {}
